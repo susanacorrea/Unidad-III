@@ -1,44 +1,47 @@
 """
-Autor: Alfredo
+Autor: Susy
 """
-
-#Importamos la librería psycopg2, encargada de adaptar el lenguaje de Python a PostgreSQL
+#Importamos la librería psycopg2 y config (el archivo que hemos generado)
 import psycopg2
-#Importamos el método config del modulo config
 from config import config
 
-# Creamos una función para insertar datos en la tabla parts
 def add_part(part_name, vendor_list):
     """Inserción se datos en la tabla parts"""
-	# Creamos la sentencia de inserción en la tabla parts
+	
+	# Creamos la sentencias de inserción
     insert_part = """INSERT INTO parts(part_name) VALUES(%s) RETURNING part_id"""
-    # Creamos la sentencia de inserción en la tabla vendors
     assign_vendor = """INSERT INTO vendor_parts(vendor_id, part_id) VALUES(%s, %s)"""
+	
 	#Inicializamos la variable de conexión
     connection = None
-	# Abrimos una seccion para el control de exepciones
+	
+	# Intentamos el codigo
     try:
-		# Leemos la configuración de la base de datos
+		
+		# Asignamos los parametros de conexión
         params = config()
-		# Conectamos a la base de datos
+		
+		# Conectamos a la base de datos y creamos un nuevo cursor
         connection = psycopg2.connect(**params)
-		# Creamos un nuevo cursor
         cursor = connection.cursor()
-        # Insertamos una nueva parte
+		
+        # Insertamos una nueva parte y obtenemos el id insertado
         cursor.execute(insert_part, (part_name,))
-        # Obtenemos el id insertado
         part_id = cursor.fetchone()[0]
-        # assign parts provided by vendors
+		
+        # Asignamos las partes proveidas por los vendores
         for vendor_id in vendor_list:
             cursor.execute(assign_vendor, (vendor_id, part_id))
-        # Aplicamos los cambios
+        
+		# Realizamos los cambios
         connection.commit()
-		# Manejamos las exepciones
+		
+	# Atrapamos las exepciones
     except(Exception, psycopg2.DatabaseError) as error:
-		# Imprimimos el error resultante
+		# Imprimimos las exepciones
         print(error)
     finally:
-		# Verificamos que la conexion este cerrada, de lo contrario la cerramos
+		# Cerramos la conexión
         if connection is not None:
             connection.close()
 

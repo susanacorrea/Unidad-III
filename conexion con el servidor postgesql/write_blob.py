@@ -1,46 +1,51 @@
 """
-Autor: Alfredo
+Autor: Susy
 """
-
-#Importamos la libreria psycopg2, encargada de adaptar el lenguaje de Python a PostgreSQL
+#Importamos la librería psycopg2 y config (el archivo que hemos generado)
 import psycopg2
-#Importamos el método config del modulo config
 from config import config
 
 
 def write_blob(part_id, path_to_file, file_extension):
-    """ Inserción una información en formato BLOB dentro de una tabla"""
+    """ Inserción de archivo BLOB dentro de una tabla"""
+	
 	#Inicializamos la variable de conexión
     conn = None
-	# Abrimos una sección para el control de exepciones
+	
+	# Intentamos el codigo
     try:
         # Leemos los datos de la imagen 
         drawing = open(path_to_file, 'rb').read()
-        # Leemos la configuración de la base de datos
+        
+		# Asignamos los parametros de conexión
         params = config()
-        # Conectamos a la base de datos
+        
+		# Conectamos a la base de datos y creamos un nuevo cursor
         conn = psycopg2.connect(**params)
-        # Creamos un nuevo cursor
         cur = conn.cursor()
-        # execute the INSERT statement
+        
+		# Ejecutamos la sentencia de insercción
         cur.execute("INSERT INTO part_drawings(part_id,file_extension,drawing_data) " +
                     "VALUES(%s,%s,%s)",
                     (part_id, file_extension, psycopg2.Binary(drawing)))
-        # Aplicamos los cambios
+        
+		# Realizamos los cambios
         conn.commit()
-        # close the communication with the PostgresQL database
+        
+		#Cerramos la conexión
         cur.close()
-		# Manejamos las exepciones
+		
+	# Atrapamos las exepciones
     except (Exception, psycopg2.DatabaseError) as error:
-		# Imprimimos el error resultante
+		# Imprimimos las exepciones
         print(error)
     finally:
-		# Verificamos que la conexion este cerrada, de lo contrario la cerramos
+		#Cerramos la conexión
         if conn is not None:
             conn.close()
 			
 
 if __name__ == '__main__':
-	# Isertamos registros en la tabla
+	# Isertamos imagenes en la tabla
     write_blob(1, 'images/simtray.jpg', 'jpg')
     write_blob(2, 'images/speaker.jpg', 'jpg')

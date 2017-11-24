@@ -1,16 +1,14 @@
 """
-Autor: Alfredo
+Autor: Susy
 """
-
-#Importamos la librería psycopg2, encargada de adaptar el lenguaje de Python a PostgreSQL
+#Importamos la librería psycopg2 y config (el archivo que hemos generado)
 import psycopg2
-#Importamos el método config del modulo config
 from config import config
 
-#Creamos un nuevo método para crear las tablas en la base de datos
+
 def create_tables():
 
-    """Creamos las tablas en la base de datos Postgresql"""
+    """Crea las tablas en la base de datos Postgresql"""
 
     commands= ("""CREATE TABLE log(
                   id SERIAL PRIMARY KEY,
@@ -44,30 +42,36 @@ def create_tables():
 
     #Inicializamos la variable connention con el valor de None
     connection = None
-    #Abrimos una sección para el control de exepciones
+    
+	# Intentamos el codigo
     try:
-        #Asignamos el metodo config() a la variable params
+        
+		# Asignamos los parametros de conexión
         params = config()
-        # Leemos los parametros de conexion
+        
+		# Conectamos a la base de datos y creamos un nuevo cursor
         connection = psycopg2.connect(**params)
-        #Creamos un nuevo cursor
         cursor = connection.cursor()
-        # Creamos la tabla una por una
+		
+        # Creamos la tabla una fila a la vez
         for command in commands:
             cursor.execute(command)
-        # Cerramos la conexión con el servidor PostgresSQL
+			
+        # Cerramos la conexión
         cursor.close()
-        #Aplicamos los cambios
+        
+		# Realizamos los cambios
         connection.commit()
-        #Manejamos las exepciones
+		
+	# Atrapamos las exepciones
     except(Exception, psycopg2.DatabaseError) as error:
-        #Imprimimos el error resultante
+        # Imprimimos las exepciones
         print(error)
     finally:
-        #Verificamos que la conexión este cerrada, de lo contrario la cerramos
+        # Cerramos la conexión
         if connection is not None:
             connection.close()
 
 if __name__ == '__main__':
-    #Ejecutamos la funcion creada
+    #Ejecutamos la función
     create_tables()

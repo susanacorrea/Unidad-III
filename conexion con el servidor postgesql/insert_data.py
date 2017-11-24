@@ -1,74 +1,66 @@
 """
-Autor: Alfredo
+Autor: Susy
 """
-
-#Importamos la librería psycopg2, encargada de adaptar el lenguaje de Python a PostgreSQL
+#Importamos la librería psycopg2 y config (el archivo que hemos generado)
 import psycopg2
-#Importamos el método config del modulo config
 from config import config
 
-#Creamos una función para insertar valores en vendor
-#Asignando como parametro vendor_name
 def insert_vendor(vendor_name):
-    """Insertamos un nuevo vendor dentro de la tabla vendors"""
+    """Inserta un vendor dentro de la tabla de los vendores"""
     sql = """INSERT INTO vendors(vendor_name) VALUES(%s) RETURNING vendor_id;"""
-    # Inicializamos la variable de conexión
-    connection = None
-    # Inicializamos la variable del vendor_id con el valor de None
+    #Inicializamos las variables a utilizar
+	connection = None
     vendor_id = None
-	# Abrimos una sección para el control de exepciones
+	# Intentamos el codigo
     try:
-        # Leemos la configuración de la base de datos
+        # Asignamos los parametros de conexión
         params = config()
-        # Conectamos a la base de datos
+        # Conectamos a la base de datos y creamos un nuevo cursor
         connection = psycopg2.connect(**params)
-        # Creamos un nuevo cursor
         cursor = connection.cursor()
-        # Ejecutamos la sentencia de insercción
+        # Ejecutamos la sentencia y almacenamos el vendor_id
         cursor.execute(sql, (vendor_name,))
-        # Obtenemos el id insertado
         vendor_id = cursor.fetchone()[0]
-        # Aplicamos los cambios
+		# Realizamos los cambios
         connection.commit()
 		# Cerramos la conexión
         cursor.close()
-	# Manejamos las exepciones
+	# Atrapamos las exepciones
     except(Exception, psycopg2. DatabaseError) as error:
-		# Imprimimos los errores resultantes
+		 # Imprimimos las exepciones
         print(error)
     finally:
-		# Verificamos que la conexión este cerrada, de lo contrario la cerramos
+		# Cerramos la conexión
         if connection is not None:
             connection.close()
-	# Retornamos el valor de vendor_id
+	#Retornamos id del vendedor
     return vendor_id
 
-# Creamos una función para la inserción de venderores
+
 def insert_vendor_list(vendor_list):
-    """Insertar multiples vendors dentro de la tablas vendor"""
-	# Creamos la sentencia SQL para la insercción
+    """Insertar varios vendores dentro de la tablas vendor"""
+	# Creamos la sentencia SQL
     sql = """INSERT INTO vendors(vendor_name) VALUES(%s)"""
 	# Inicializamos la variable de conexión
     connection = None
-    try:
-        # Leemos los parametros de conexión
+    # Intentamos el codigo
+	try:
+        # Asignamos los parametros de conexión
         params = config()
-		# Creamos la conexión
+		# Conectamos a la base de datos y creamos un nuevo cursor
         connection = psycopg2.connect(**params)
-        # Creamos un nuevo cursor
         cursor = connection.cursor()
-		# Ejecutamos la sentencia
+		# Ejecutamos la sentencia y realizamos los cambios
         cursor.executemany(sql, vendor_list)
-        # Aplicamos los cambios
         connection.commit()
         # Cerramos la conexión
         cursor.close()
-	# Manejamos las exepciones
+	# Atrapamos las exepciones
     except(Exception, psycopg2.DatabaseError) as error:
-		# Imprimimos el error resultante
+		# Imprimimos las exepciones
         print(error)
     finally:
-		# Verificamos que la conexion este cerrada, de lo contrario la cerramos
+		# Cerramos la conexión
         if connection is not None:
             connection.close()
 

@@ -1,18 +1,16 @@
 """
-Autor: Alfredo
+Autor: Susy
 """
-
-#Importamos la libreria ConfigParser para verificar la estructura de la conexion
+#Importamos la libreria ConfigParser
 from configparser import ConfigParser
 
-#Creamos una funcion, donde cargamos el archivo con los parametros de conexion y seleccionamos la seccion de postgreSQL
 def config(filename='database.ini', section='postgresql'):
-    # Creamos el analizador
+    # Creamos el parser
     parser = ConfigParser()
-    # Leemos la configuracion del archivo
+    # Analizacmos los parametros del archivo
     parser.read(filename)
 
-    #Creamos un diccionario para la base de datos
+    # Inicilizamos un diccionario
     db = {}
     # Obtenemos la section de postgreSQL
     if parser.has_section(section):
@@ -20,7 +18,7 @@ def config(filename='database.ini', section='postgresql'):
         for param in params:
             db[param[0]] = param[1]
     else:
-        #Si se presenta un error lo mostraremos en pantalla
+        # Imprimimos errores emergentes
         raise Exception('Section {0} not found in the {1} file'.format(section, filename))
-    #Retornamos el diccionario con los parametros
+    # Devolvemos el diccionario con los datos
     return db

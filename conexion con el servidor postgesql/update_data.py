@@ -1,45 +1,55 @@
 """
-Autor: Alfredo
+Autor: Susy
 """
-
-#Importamos la libreria psycopg2, encargada de adaptar el lenguaje de Python a PostgreSQL
+#Importamos la librería psycopg2 y config (el archivo que hemos generado)
 import psycopg2
-#Importamos el metodo config del modulo config
 from config import config
 
 
 def update_vendor(vendor_id, vendor_name):
-    """ Actualización de venderores basados en vendor_id"""
+    """ Modifica los vendedores a través del vendor_id"""
+	
 	#Creamos la sentencia de actualización
     sql = """UPDATE vendors
                 set vendor_name = %s
                 WHERE  vendor_id = %s"""
-	# Abrimos una sección para el control de exepciones
+	
+	# Intentamos el codigo
     try:
 		#Inicializamos las variables
         connection = None
         updated_rows = 0
-		# Leemos la configuracion de la base de datos
+		
+		# Asignamos los parametros de conexión
         params = config()
-		# Conectamos a la base de datos
+		
+		# Conectamos a la base de datos y creamos un nuevo cursor
         connection = psycopg2.connect(**params)
-		# Creamos un nuevo cursor
         cursor = connection.cursor()
-        cursor.execute(sql, (vendor_name, vendor_id))
+        
+		#Ejecutamos la sentencia sql con el nombre del vendedor y su id
+		cursor.execute(sql, (vendor_name, vendor_id))
+		
+		# Almacenamos el número de filas
         updated_rows = cursor.rowcount
-		# Aplicamos los cambios
+		
+		# Realizamos los cambios
         connection.commit()
-        cursor.close()
-		# Manejamos las exepciones
+        
+		# Cerramos la conexión
+		cursor.close()
+		# Atrapamos las exepciones
     except(Exception, psycopg2.DatabaseError) as error:
-		# Imprimimos el error resultante
+		# Imprimimos las exepciones
         print(error)
     finally:
-		# Verificamos que la conexion este cerrada, de lo contrario la cerramos
+		# Cerramos la conexión
         if connection is not None:
             connection.close()
+	#Retornamos el número de tuplas modificadas
     return updated_rows
 
 
 if __name__ == '__main__':
+	#Modificamos el valor del vendedor con el id 1
     print(update_vendor(1, '3M Corp'))
